@@ -1,0 +1,1059 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climb Comparison — Cootha vs Nebo vs Benwerrin</title>
+
+    <!-- Google Fonts: Inter for that clean, modern look -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        /* ==========================================================
+           CSS VARIABLES (Design Tokens)
+           These are like a "settings panel" for the whole design.
+           Change a value here and it updates everywhere.
+           ========================================================== */
+        :root {
+            --color-primary: #FC4C02;          /* Strava orange — the signature accent */
+            --color-primary-light: #FF6D2E;    /* Lighter orange for hover/glow */
+            --color-primary-subtle: rgba(252, 76, 2, 0.08); /* Faint orange tint for backgrounds */
+            --color-bg: #F8F8F8;               /* Page background — warm off-white */
+            --color-surface: #FFFFFF;           /* Card backgrounds */
+            --color-text: #1A1A1A;             /* Main text — near-black */
+            --color-text-muted: #6B7280;       /* Secondary text — medium grey */
+            --color-text-light: #9CA3AF;       /* Tertiary text — light grey */
+            --color-border: #E5E7EB;           /* Subtle borders */
+            --color-divider: #F0F0F0;          /* Even subtler dividers */
+
+            /* Climb accent colours — muted and sophisticated */
+            --color-cootha: #E85D4A;            /* Warm red-orange */
+            --color-nebo: #2B9E93;              /* Teal green */
+            --color-benwerrin: #7C5CBF;         /* Rich purple */
+
+            /* Gradient difficulty colours — for the elevation bars */
+            --grade-easy: #4CAF50;
+            --grade-moderate: #F5A623;
+            --grade-hard: #E8563A;
+            --grade-extreme: #C41C3B;
+
+            --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            --radius: 16px;                    /* Rounded corners on cards */
+            --radius-sm: 8px;                  /* Smaller rounded corners */
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03);
+            --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,0.04);
+            --shadow-hover: 0 4px 12px rgba(0,0,0,0.08), 0 16px 40px rgba(0,0,0,0.06);
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+
+        /* ==========================================================
+           RESET & BASE STYLES
+           Clears browser defaults so everything looks consistent.
+           ========================================================== */
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;  /* Makes text look crisper on Mac */
+        }
+
+
+        /* ==========================================================
+           HEADER
+           The top banner with the mountain icon and title.
+           ========================================================== */
+        .header {
+            text-align: center;
+            padding: 48px 24px 40px;
+            position: relative;
+        }
+
+        /* Mountain icon — an inline SVG sitting above the title */
+        .header-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 56px;
+            height: 56px;
+            background: var(--color-primary);
+            border-radius: 14px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 16px rgba(252, 76, 2, 0.25);
+        }
+
+        .header-icon svg {
+            width: 28px;
+            height: 28px;
+            fill: #FFFFFF;
+        }
+
+        .header h1 {
+            font-size: clamp(1.75rem, 4vw, 2.5rem); /* Responsive font — scales with screen */
+            font-weight: 800;
+            letter-spacing: -0.03em;   /* Tightens letter spacing for a premium feel */
+            color: var(--color-text);
+            margin-bottom: 8px;
+        }
+
+        /* The orange accent dot in the title */
+        .header h1 .accent {
+            color: var(--color-primary);
+        }
+
+        .header .subtitle {
+            font-size: 1rem;
+            color: var(--color-text-muted);
+            font-weight: 400;
+        }
+
+        /* Thin orange line under the header for visual separation */
+        .header-divider {
+            width: 48px;
+            height: 3px;
+            background: var(--color-primary);
+            border-radius: 2px;
+            margin: 24px auto 0;
+        }
+
+
+        /* ==========================================================
+           CONTAINER
+           Wraps all the main content with comfortable max-width.
+           ========================================================== */
+        .container {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 24px 64px;
+        }
+
+
+        /* ==========================================================
+           CLIMB CARDS GRID
+           Lays out the three climb cards side by side (or stacked
+           on smaller screens).
+           ========================================================== */
+        .climb-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            margin-bottom: 48px;
+        }
+
+        /* Stack cards vertically on tablets and phones */
+        @media (max-width: 1024px) {
+            .climb-grid {
+                grid-template-columns: 1fr;
+                max-width: 600px;
+                margin-left: auto;
+                margin-right: auto;
+            }
+        }
+
+
+        /* ==========================================================
+           INDIVIDUAL CLIMB CARD
+           Each card contains the name, stats, gradient profile,
+           and a short description of the climb's character.
+           ========================================================== */
+        .climb-card {
+            background: var(--color-surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform var(--transition), box-shadow var(--transition);
+
+            /* Animation: cards fade in and slide up on page load */
+            opacity: 0;
+            transform: translateY(24px);
+        }
+
+        /* Cards lift slightly and shadow deepens on hover */
+        .climb-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* When the card becomes visible (via JS), this class triggers the animation */
+        .climb-card.visible {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        /* Stagger the animation — each card appears slightly after the previous */
+        .climb-card:nth-child(1).visible { animation-delay: 0.1s; }
+        .climb-card:nth-child(2).visible { animation-delay: 0.25s; }
+        .climb-card:nth-child(3).visible { animation-delay: 0.4s; }
+
+        /* The coloured strip at the top of each card — identifies the climb */
+        .card-accent {
+            height: 4px;
+        }
+        .card-accent.cootha    { background: var(--color-cootha); }
+        .card-accent.nebo      { background: var(--color-nebo); }
+        .card-accent.benwerrin { background: var(--color-benwerrin); }
+
+        .card-body {
+            padding: 28px 24px 24px;
+        }
+
+        /* Climb name heading */
+        .climb-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 4px;
+        }
+
+        .climb-subtitle {
+            font-size: 0.8rem;
+            color: var(--color-text-light);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 20px;
+        }
+
+
+        /* ==========================================================
+           STATS ROW
+           The four key metrics displayed in a horizontal row
+           inside each card.
+           ========================================================== */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2px;
+            background: var(--color-divider);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .stat {
+            background: var(--color-surface);
+            padding: 14px 10px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-text-light);
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-text);
+        }
+
+        /* The "primary" stat (max gradient) gets the orange highlight */
+        .stat-value.highlight {
+            color: var(--color-primary);
+        }
+
+
+        /* ==========================================================
+           GRADIENT PROFILE CHART
+           The stacked bar chart showing the difficulty of each
+           section of the climb.
+           ========================================================== */
+        .profile-chart {
+            display: flex;
+            align-items: flex-end;
+            gap: 6px;
+            height: 200px;
+            padding: 0 4px 40px;
+            margin-bottom: 8px;
+            position: relative;
+        }
+
+        /* Faint horizontal reference lines behind the bars */
+        .profile-chart::before {
+            content: '';
+            position: absolute;
+            inset: 0 4px 40px;
+            background: repeating-linear-gradient(
+                to bottom,
+                transparent,
+                transparent calc(25% - 1px),
+                var(--color-divider) calc(25% - 1px),
+                var(--color-divider) 25%
+            );
+            pointer-events: none;
+        }
+
+        /* Each section (one bar) in the profile chart */
+        .profile-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            min-width: 0;
+        }
+
+        /* The actual coloured bar */
+        .profile-bar {
+            width: 100%;
+            border-radius: 6px 6px 2px 2px;
+            position: relative;
+            overflow: hidden;
+            /* Start at 0 height — the animation grows it upward */
+            max-height: 0;
+            transition: max-height 1s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* When animated, bars grow to their full height */
+        .profile-bar.animated {
+            max-height: 200px;
+        }
+
+        /* A subtle shimmer overlay on each bar for polish */
+        .profile-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255,255,255,0.15) 0%,
+                transparent 50%,
+                rgba(0,0,0,0.05) 100%
+            );
+            pointer-events: none;
+        }
+
+        /* Gradient colour fills based on difficulty */
+        .profile-bar.easy     { background: var(--grade-easy); }
+        .profile-bar.moderate { background: var(--grade-moderate); }
+        .profile-bar.hard     { background: var(--grade-hard); }
+        .profile-bar.extreme  { background: var(--grade-extreme); }
+
+        /* The grade percentage shown inside the bar */
+        .bar-label {
+            position: absolute;
+            top: 8px;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+            opacity: 0;
+            transition: opacity 0.4s ease 1s;  /* Fade in after bars finish growing */
+        }
+        .profile-bar.animated .bar-label {
+            opacity: 1;
+        }
+
+        /* Section name & distance below each bar */
+        .section-label {
+            position: absolute;
+            bottom: -36px;
+            width: 100%;
+            text-align: center;
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--color-text-muted);
+            line-height: 1.3;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .section-label .distance {
+            display: block;
+            font-weight: 400;
+            color: var(--color-text-light);
+            font-size: 0.6rem;
+        }
+
+
+        /* ==========================================================
+           CLIMB CHARACTER DESCRIPTION
+           A short text blurb at the bottom of each card
+           describing how the climb "feels."
+           ========================================================== */
+        .climb-character {
+            font-size: 0.85rem;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+            padding-top: 16px;
+            border-top: 1px solid var(--color-divider);
+        }
+
+        .climb-character strong {
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+
+        /* ==========================================================
+           COMPARISON TABLE
+           The side-by-side metrics table below the cards.
+           ========================================================== */
+        .table-section {
+            background: var(--color-surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            margin-bottom: 32px;
+
+            /* Animation: fade in */
+            opacity: 0;
+            transform: translateY(24px);
+        }
+
+        .table-section.visible {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 0.2s;
+        }
+
+        .section-header {
+            padding: 24px 28px 12px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .comparison-table thead th {
+            padding: 12px 20px;
+            text-align: left;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--color-text-light);
+            border-bottom: 1px solid var(--color-border);
+        }
+
+        .comparison-table tbody td {
+            padding: 14px 20px;
+            font-size: 0.9rem;
+            border-bottom: 1px solid var(--color-divider);
+        }
+
+        .comparison-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Subtle hover highlight on table rows */
+        .comparison-table tbody tr {
+            transition: background var(--transition);
+        }
+        .comparison-table tbody tr:hover {
+            background: var(--color-primary-subtle);
+        }
+
+        .metric-name {
+            font-weight: 600;
+            color: var(--color-text);
+        }
+
+        /* Each climb's value gets a coloured left border pip */
+        .val-cootha, .val-nebo, .val-benwerrin {
+            font-weight: 600;
+            position: relative;
+            padding-left: 24px !important;
+        }
+        .val-cootha::before,
+        .val-nebo::before,
+        .val-benwerrin::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+        }
+        .val-cootha::before    { background: var(--color-cootha); }
+        .val-nebo::before      { background: var(--color-nebo); }
+        .val-benwerrin::before { background: var(--color-benwerrin); }
+
+        .val-cootha    { color: var(--color-cootha); }
+        .val-nebo      { color: var(--color-nebo); }
+        .val-benwerrin { color: var(--color-benwerrin); }
+
+
+        /* ==========================================================
+           INSIGHTS BOX
+           The "Training Priorities" card at the bottom.
+           ========================================================== */
+        .insights {
+            background: var(--color-surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+
+            /* Animation */
+            opacity: 0;
+            transform: translateY(24px);
+        }
+
+        .insights.visible {
+            animation: fadeInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 0.3s;
+        }
+
+        /* Orange top accent bar on the insights card */
+        .insights-accent {
+            height: 4px;
+            background: linear-gradient(90deg, var(--color-primary), var(--color-primary-light));
+        }
+
+        .insights-body {
+            padding: 28px;
+        }
+
+        .insights-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: -0.01em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Small mountain icon next to the insights title */
+        .insights-title svg {
+            width: 20px;
+            height: 20px;
+            fill: var(--color-primary);
+            flex-shrink: 0;
+        }
+
+        .insights p {
+            font-size: 0.9rem;
+            color: var(--color-text-muted);
+            line-height: 1.7;
+            margin-bottom: 14px;
+        }
+
+        .insights p:last-child {
+            margin-bottom: 0;
+        }
+
+        .insights strong {
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        /* Climb name tags within the insights text */
+        .tag {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 2px 8px;
+            border-radius: 4px;
+            vertical-align: middle;
+        }
+        .tag.cootha    { background: rgba(232,93,74,0.1); color: var(--color-cootha); }
+        .tag.nebo      { background: rgba(43,158,147,0.1); color: var(--color-nebo); }
+        .tag.benwerrin { background: rgba(124,92,191,0.1); color: var(--color-benwerrin); }
+
+
+        /* ==========================================================
+           GRADIENT LEGEND
+           Small coloured dots explaining the difficulty scale.
+           ========================================================== */
+        .legend {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--color-text-muted);
+        }
+
+        .legend-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+        .legend-dot.easy     { background: var(--grade-easy); }
+        .legend-dot.moderate { background: var(--grade-moderate); }
+        .legend-dot.hard     { background: var(--grade-hard); }
+        .legend-dot.extreme  { background: var(--grade-extreme); }
+
+
+        /* ==========================================================
+           FOOTER
+           Simple, understated footer.
+           ========================================================== */
+        .footer {
+            text-align: center;
+            padding: 32px 24px;
+            font-size: 0.75rem;
+            color: var(--color-text-light);
+        }
+
+
+        /* ==========================================================
+           KEYFRAME ANIMATIONS
+           ========================================================== */
+
+        /* Fade in while sliding up — used for cards and sections */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(24px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+
+        /* ==========================================================
+           RESPONSIVE ADJUSTMENTS
+           Fine-tuning for smaller screens.
+           ========================================================== */
+        @media (max-width: 640px) {
+            .header { padding: 32px 16px 28px; }
+            .container { padding: 0 16px 48px; }
+            .card-body { padding: 20px 16px; }
+            .insights-body { padding: 20px; }
+
+            .stats-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .profile-chart {
+                height: 160px;
+            }
+
+            /* Make the comparison table scrollable on small screens */
+            .table-wrapper {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .comparison-table {
+                min-width: 520px;
+            }
+
+            .legend {
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ============================================================
+         HEADER
+         Mountain icon + page title. The icon is a simple SVG
+         of a mountain peak — no image files needed.
+         ============================================================ -->
+    <header class="header">
+        <div class="header-icon">
+            <!-- Mountain peak icon (inline SVG so it loads instantly) -->
+            <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M 13 3 L 8.5 11.5 L 10.5 11.5 L 7 19 L 21 19 Z"/>
+                <path d="M 5 19 L 10 11 L 8 11 L 11.5 5 L 9.5 8.5 L 7.5 8.5 L 3 19 Z" opacity="0.6"/>
+            </svg>
+        </div>
+        <h1>Climb Comparison<span class="accent">.</span></h1>
+        <p class="subtitle">Cootha vs Nebo vs Benwerrin — May Event Preparation</p>
+        <div class="header-divider"></div>
+    </header>
+
+    <main class="container">
+
+        <!-- Colour legend for the gradient difficulty scale -->
+        <div class="legend">
+            <div class="legend-item"><span class="legend-dot easy"></span> Easy &lt;5%</div>
+            <div class="legend-item"><span class="legend-dot moderate"></span> Moderate 5–8%</div>
+            <div class="legend-item"><span class="legend-dot hard"></span> Hard 8–12%</div>
+            <div class="legend-item"><span class="legend-dot extreme"></span> Extreme 12%+</div>
+        </div>
+
+        <!-- ==========================================================
+             CLIMB CARDS
+             Three cards, one per climb. Each has:
+             - A coloured top stripe
+             - Stats row (distance, elevation, avg/max grade)
+             - Bar chart showing gradient profile
+             - Character description
+             ========================================================== -->
+        <div class="climb-grid">
+
+            <!-- COOTHA CARD -->
+            <div class="climb-card">
+                <div class="card-accent cootha"></div>
+                <div class="card-body">
+                    <h2 class="climb-name">Cootha</h2>
+                    <p class="climb-subtitle">South-East Queensland</p>
+
+                    <div class="stats-row">
+                        <div class="stat">
+                            <div class="stat-label">Distance</div>
+                            <div class="stat-value">6.73 km</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Elevation</div>
+                            <div class="stat-value">467 m</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Avg Grade</div>
+                            <div class="stat-value">6.9%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Max Grade</div>
+                            <div class="stat-value highlight">9.2%</div>
+                        </div>
+                    </div>
+
+                    <!-- Gradient profile: each bar is one section of the climb -->
+                    <div class="profile-chart">
+                        <div class="profile-section">
+                            <div class="profile-bar moderate" style="height: 90px;" data-animate>
+                                <span class="bar-label">5.2%</span>
+                            </div>
+                            <div class="section-label">No Bullshit<span class="distance">4.51 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar extreme" style="height: 155px;" data-animate>
+                                <span class="bar-label">9.2%</span>
+                            </div>
+                            <div class="section-label">Mt Cootha Back<span class="distance">2.22 km</span></div>
+                        </div>
+                    </div>
+
+                    <p class="climb-character">
+                        <strong>Character:</strong> Moderate start then a brutal sustained finish. The 9.2% for 2.2 km is a relentless power test.
+                    </p>
+                </div>
+            </div>
+
+            <!-- NEBO CARD -->
+            <div class="climb-card">
+                <div class="card-accent nebo"></div>
+                <div class="card-body">
+                    <h2 class="climb-name">Nebo</h2>
+                    <p class="climb-subtitle">D'Aguilar Range</p>
+
+                    <div class="stats-row">
+                        <div class="stat">
+                            <div class="stat-label">Distance</div>
+                            <div class="stat-value">15.6 km</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Elevation</div>
+                            <div class="stat-value">1,091 m</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Avg Grade</div>
+                            <div class="stat-value">7.0%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Max Grade</div>
+                            <div class="stat-value highlight">13.3%</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-chart">
+                        <div class="profile-section">
+                            <div class="profile-bar easy" style="height: 50px;" data-animate>
+                                <span class="bar-label">3.3%</span>
+                            </div>
+                            <div class="section-label">McAfees<span class="distance">7.2 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar easy" style="height: 55px;" data-animate>
+                                <span class="bar-label">3.5%</span>
+                            </div>
+                            <div class="section-label">Bellbird<span class="distance">4.5 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar moderate" style="height: 80px;" data-animate>
+                                <span class="bar-label">5.6%</span>
+                            </div>
+                            <div class="section-label">Mt Nebo<span class="distance">1.5 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar extreme" style="height: 145px;" data-animate>
+                                <span class="bar-label">13.2%</span>
+                            </div>
+                            <div class="section-label">Ross Rd<span class="distance">0.68 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar moderate" style="height: 75px;" data-animate>
+                                <span class="bar-label">5.3%</span>
+                            </div>
+                            <div class="section-label">Chairlift<span class="distance">3.4 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar extreme" style="height: 150px;" data-animate>
+                                <span class="bar-label">13.3%</span>
+                            </div>
+                            <div class="section-label">Mt Nebo Rd<span class="distance">0.95 km</span></div>
+                        </div>
+                    </div>
+
+                    <p class="climb-character">
+                        <strong>Character:</strong> Long varied climb with two brutal 13%+ peaks. Tests pacing and fuel management over distance.
+                    </p>
+                </div>
+            </div>
+
+            <!-- BENWERRIN CARD -->
+            <div class="climb-card">
+                <div class="card-accent benwerrin"></div>
+                <div class="card-body">
+                    <h2 class="climb-name">Benwerrin</h2>
+                    <p class="climb-subtitle">Gold Coast Hinterland — May Event</p>
+
+                    <div class="stats-row">
+                        <div class="stat">
+                            <div class="stat-label">Distance</div>
+                            <div class="stat-value">12.0 km</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Elevation</div>
+                            <div class="stat-value">427 m</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Avg Grade</div>
+                            <div class="stat-value">2.4%</div>
+                        </div>
+                        <div class="stat">
+                            <div class="stat-label">Max Grade</div>
+                            <div class="stat-value highlight">18.0%</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-chart">
+                        <div class="profile-section">
+                            <div class="profile-bar easy" style="height: 40px;" data-animate>
+                                <span class="bar-label">2.4%</span>
+                            </div>
+                            <div class="section-label">Early Climb<span class="distance">6.0 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar moderate" style="height: 75px;" data-animate>
+                                <span class="bar-label">5–7%</span>
+                            </div>
+                            <div class="section-label">Build<span class="distance">3.0 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar hard" style="height: 110px;" data-animate>
+                                <span class="bar-label">8–10%</span>
+                            </div>
+                            <div class="section-label">Steep<span class="distance">2.0 km</span></div>
+                        </div>
+                        <div class="profile-section">
+                            <div class="profile-bar extreme" style="height: 160px;" data-animate>
+                                <span class="bar-label">18%</span>
+                            </div>
+                            <div class="section-label">Finale<span class="distance">1.0 km</span></div>
+                        </div>
+                    </div>
+
+                    <p class="climb-character">
+                        <strong>Character:</strong> Long steady build then a vicious 18% kick at the finish. Requires reserve power when fatigued.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- ==========================================================
+             COMPARISON TABLE
+             All three climbs side by side, metric by metric.
+             ========================================================== -->
+        <div class="table-section">
+            <h2 class="section-header">Head-to-Head Comparison</h2>
+            <div class="table-wrapper">
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 28%;">Metric</th>
+                            <th style="width: 24%;">Cootha</th>
+                            <th style="width: 24%;">Nebo</th>
+                            <th style="width: 24%;">Benwerrin</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="metric-name">Climbing Distance</td>
+                            <td class="val-cootha">6.73 km</td>
+                            <td class="val-nebo">15.6 km</td>
+                            <td class="val-benwerrin">12.0 km</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Elevation Gain</td>
+                            <td class="val-cootha">467 m</td>
+                            <td class="val-nebo">1,091 m</td>
+                            <td class="val-benwerrin">427 m</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Average Gradient</td>
+                            <td class="val-cootha">6.9%</td>
+                            <td class="val-nebo">7.0%</td>
+                            <td class="val-benwerrin">2.4%</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Max Gradient</td>
+                            <td class="val-cootha">9.2%</td>
+                            <td class="val-nebo">13.3%</td>
+                            <td class="val-benwerrin">18.0%</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Hardest Section</td>
+                            <td class="val-cootha">2.2 km @ 9.2%</td>
+                            <td class="val-nebo">Two peaks @ 13%+</td>
+                            <td class="val-benwerrin">1 km @ 18%</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Est. Duration</td>
+                            <td class="val-cootha">~25–30 min</td>
+                            <td class="val-nebo">~75–90 min</td>
+                            <td class="val-benwerrin">~35–40 min</td>
+                        </tr>
+                        <tr>
+                            <td class="metric-name">Training Focus</td>
+                            <td class="val-cootha">Sustained power</td>
+                            <td class="val-nebo">Endurance & pacing</td>
+                            <td class="val-benwerrin">Late-climb power</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+        <!-- ==========================================================
+             TRAINING INSIGHTS
+             Practical advice for preparing for the May event.
+             ========================================================== -->
+        <div class="insights">
+            <div class="insights-accent"></div>
+            <div class="insights-body">
+                <h2 class="insights-title">
+                    <!-- Small mountain icon -->
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 13 3 L 8.5 11.5 L 10.5 11.5 L 7 19 L 21 19 Z"/>
+                        <path d="M 5 19 L 10 11 L 8 11 L 11.5 5 L 9.5 8.5 L 7.5 8.5 L 3 19 Z" opacity="0.6"/>
+                    </svg>
+                    Training Priorities for May
+                </h2>
+
+                <p>
+                    <span class="tag benwerrin">Benwerrin</span>
+                    <strong>is the event climb.</strong> It has the steepest gradient (18%) and that final 1 km kick comes when you're already fatigued from 11 km of climbing. This is what you need to prepare for.
+                </p>
+
+                <p>
+                    <span class="tag cootha">Cootha</span>
+                    <strong>(6.73 km, 467 m):</strong> Use this for building sustained power. The 2.2 km at 9.2% teaches your body to maintain threshold effort on moderate-steep climbing. Good for VO2Max work and power development.
+                </p>
+
+                <p>
+                    <span class="tag nebo">Nebo</span>
+                    <strong>(15.6 km, 1,091 m):</strong> Use this for endurance and pacing discipline. It's nearly 2.3x longer than Benwerrin and teaches you how to manage fuel and effort over a long climb with multiple hard pitches. Great for race simulation.
+                </p>
+
+                <p>
+                    <strong>The key difference:</strong> Benwerrin's 18% finish is nastier than anything Cootha or Nebo throw at you individually. Your May prep should include regular work on that final-kilometre power when fatigued. Train Cootha for power foundation, Nebo for endurance foundation, but specifically practise Benwerrin-style finish-with-power efforts regularly.
+                </p>
+            </div>
+        </div>
+
+    </main>
+
+    <footer class="footer">
+        Climb Comparison Tool — Data for training purposes
+    </footer>
+
+
+    <!-- ==========================================================
+         JAVASCRIPT
+         Handles two things:
+         1. Fade-in animations when sections scroll into view
+         2. Growing the gradient bars upward when cards appear
+         ========================================================== -->
+    <script>
+        /*
+         * INTERSECTION OBSERVER
+         * This watches for elements to enter the screen (the "viewport").
+         * When an element scrolls into view, it gets a "visible" class added,
+         * which triggers the CSS fade-in animation.
+         *
+         * Think of it like a sensor at the edge of the screen that says
+         * "hey, this thing just appeared — animate it now!"
+         */
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        // Add the "visible" class to trigger the animation
+                        entry.target.classList.add('visible');
+
+                        // Find any gradient bars inside this element and animate them
+                        const bars = entry.target.querySelectorAll('[data-animate]');
+                        bars.forEach((bar, index) => {
+                            // Stagger each bar slightly so they grow one after another
+                            setTimeout(() => {
+                                bar.classList.add('animated');
+                            }, index * 120);
+                        });
+
+                        // Stop watching this element (we only animate once)
+                        observer.unobserve(entry.target);
+                    }
+                });
+            },
+            {
+                /* "threshold: 0.15" means the animation triggers when 15% of
+                   the element is visible on screen */
+                threshold: 0.15,
+            }
+        );
+
+        /*
+         * Tell the observer to watch all the elements we want to animate:
+         * - .climb-card (the three climb cards)
+         * - .table-section (the comparison table)
+         * - .insights (the training insights box)
+         */
+        document.querySelectorAll('.climb-card, .table-section, .insights').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+
+</body>
+</html>
